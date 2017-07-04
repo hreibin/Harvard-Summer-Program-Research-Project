@@ -1,0 +1,84 @@
+c=[] #Scatter plot of general data
+t=[15] #This list will have an initial value of 15 because the first file retrieved is at military time 15.
+list_of_files=glob.glob('C:\\Users\\Reibin\\Desktop\\o6bokidk\\accelerometer\\*.csv') 
+for file in list_of_files: #using the glob function above, this iterates through every file in a given folder "accelerometer".
+    columns = ['timestamp', 'UTCtime', 'Accuracy','x', 'y', 'z'] # these are the names of each column
+    data=pd.read_csv(file,header=0, sep= ',', names = columns) # This is the actual read function
+    data.drop(data.columns[[0,1,2]], axis=1, inplace = True) #We eliminate the first three columns (columns not needed)
+    x=data['x'].values #yields all the "x" values
+    y=data['y'].values
+    z=data['z'].values
+    t1 = np.var(x) # Gives the variance of all the x values
+    t2 = np.var(y)
+    t3 = np.var(z)
+    x=t1 + t2 + t3 # the sum of all the three variances in the file
+    #if x<.15:
+        #x=0
+        #c.append(x)
+    #if x>=.15:
+        #x=1
+    c.append(x) #adds the summed variance to the list c
+
+# This section uses a previously defined mod function that links the time with each variance
+for i in t:
+    if len(t)<len(c):
+        t.append(mod(i+1,24)) 
+    else:
+        exit
+# This is the plot
+
+x = list(range(0,len(c)))
+plt.plot(x,c,'ob')
+plt.xticks(x[::4],t[::4]) # Goes through the x-axis and only gives fourth value
+-------------------------------------------------------------------------------
+c=[] #scatter plot of binary data 
+t=[15] 
+list_of_files=glob.glob('C:\\Users\\Reibin\\Desktop\\o6bokidk\\accelerometer\\*.csv')
+for file in list_of_files:
+    columns = ['timestamp', 'UTCtime', 'Accuracy','x', 'y', 'z']
+    data=pd.read_csv(file,header=0, sep= ',', names = columns)
+    data.drop(data.columns[[0,1,2]], axis=1, inplace = True)
+    x=data['x'].values
+    y=data['y'].values
+    z=data['z'].values
+    t1 = np.var(x)
+    t2 = np.var(y)
+    t3 = np.var(z)
+    x=t1 + t2 + t3
+    if x<.15: 
+        x=0
+        c.append(x)
+    if x>=.15:
+        x=1
+        c.append(x)
+for i in t:
+    if len(t)<len(c):
+        t.append(mod(i+1,24))
+    else:
+        exit
+x = list(range(0,len(c)))
+plt.plot(x,c,'^', color = 'red')
+plt.xticks(x[::4],t[::4])
+?plt.xticks
+-------------------------------------------------------------------------------
+#This gives us all times we think the sleep is happening
+Time_of_sleep=[]
+for i in c:
+    if i<.15:
+        Time_of_sleep.append(t[c.index(i)])
+
+# More cosmetic. Gives us "went to sleep at_" and "woke up at_"
+g=[]
+for v in range(len(Time_of_sleep)):
+    if Time_of_sleep[v] == Time_of_sleep[0]:
+        if Time_of_sleep[v]==Time_of_sleep[v+1]-1:
+            print("Went to sleep at " + str(Time_of_sleep[v]))
+
+    elif Time_of_sleep[v] == Time_of_sleep[-1]:
+        if Time_of_sleep[v] == Time_of_sleep[-1]+1:
+           print("Woke up at " + str(Time_of_sleep[v]))
+            
+    elif Time_of_sleep[v-1] != Time_of_sleep[v]-1 and Time_of_sleep[v+1] == Time_of_sleep[v]+1 :
+        print("Went to sleep at " + str(Time_of_sleep[v]))
+    elif Time_of_sleep[v-1] ==Time_of_sleep[v]-1 and Time_of_sleep[v+1] != Time_of_sleep[v]+1:
+        print("Woke up at " + str(Time_of_sleep[v]))
